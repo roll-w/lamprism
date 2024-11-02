@@ -63,6 +63,8 @@ jobs:
                 run: |
                     git clone https://github.com/roll-w/web-common-starter 
                     cd web-common-starter
+                # TODO: retrieve version from gradle task
+                    git checkout 0.2.1
                     mvn -f web-common-parent/ clean install
                     cd ..
             -   name: Create Tag
@@ -94,21 +96,25 @@ jobs:
                     docker tag lamp-blog:${{ env.raw_version_name }} ghcr.io/${{ env.namespace }}/lamp-blog:${{ env.raw_version_name }}
                     docker push ghcr.io/${{ env.namespace }}/lamp-blog:${{ env.raw_version_name }}
                     sha=$(docker inspect ghcr.io/${{ env.namespace }}/lamp-blog:${{ env.raw_version_name }} --format='{{index .RepoDigests 0}}')
-                    echo "digest=$sha" >> $GITHUB_ENV
-            -   name: Generate artifact attestation
-                uses: actions/attest-build-provenance@v1
-                with:
-                    subject-name: ghcr.io/lamp-blog
-                    subject-digest: ${{ steps.push.outputs.digest }}
-                    push-to-registry: true
+                    echo "digest=$sha" >> $GITHUB_OUTPUT
             -   name: Release
                 if: steps.build.outcome == 'success'
                 uses: softprops/action-gh-release@v2
                 with:
                     body: |
+                        # ${{ env.version_name }}
+                        
                         Release for version ${{ env.raw_version_name }}
                         
+                        ## Changes
+                        
+                        ## Artifacts
+                        
                         - Image: ghcr.io/${{ env.namespace }}/lamp-blog:${{ env.raw_version_name }}
+                            - sha: `${{ steps.push.outputs.digest }}`
+                        
+                        Pull image from `ghcr.io/${{ env.namespace }}/lamp-blog:${{ env.raw_version_name }}` 
+                        or download the image package from current release assets.
 
                     draft: true
                     tag_name: ${{ env.version_name }}
