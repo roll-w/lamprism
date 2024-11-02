@@ -64,7 +64,7 @@ jobs:
                     git clone https://github.com/roll-w/web-common-starter 
                     cd web-common-starter
                 # TODO: retrieve version from gradle task
-                    git checkout 0.2.1
+                    git checkout v0.2.1
                     mvn -f web-common-parent/ clean install
                     cd ..
             -   name: Create Tag
